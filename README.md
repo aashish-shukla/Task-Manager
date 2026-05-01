@@ -61,8 +61,8 @@ Task_Manager/
 
 ```bash
 # 1. Clone the repository
-git clone <your-repo-url>
-cd Task_Manager
+git clone https://github.com/aashish-shukla/Task-Manager.git
+cd Task-Manager
 
 # 2. Install dependencies
 npm install
@@ -136,6 +136,20 @@ npm run dev
 
 - **Admin**: Full access — create/edit/delete tasks, manage members
 - **Member**: View and update status of assigned tasks only
+
+## 📸 Screenshots
+
+### Login Page
+Clean, modern authentication interface with glassmorphism design.
+
+### Dashboard
+Real-time analytics with Chart.js — task distribution, per-user breakdown, and overdue tracking.
+
+### Kanban Board
+Drag-friendly task cards organized by status columns (To Do → In Progress → Done).
+
+### Project Management
+Create projects, manage team members with role-based access control.
 
 ## 📄 License
 
