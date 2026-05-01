@@ -4,7 +4,7 @@ A full-stack collaborative task management web application built with Node.js, E
 
 ## 🚀 Live Demo
 
-**Live URL**: *[Add your Railway URL here after deployment]*
+**Live URL**: [https://task-manager-production-5869.up.railway.app](https://task-manager-production-5869.up.railway.app)
 
 ## 📸 Features
 
