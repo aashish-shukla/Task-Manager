@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks — TaskFlow</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header"><h2>⚡ TaskFlow</h2></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="/projects.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          Projects
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div id="sidebarAvatar" class="user-avatar">?</div>
+        <div class="user-info"><div id="sidebarName" class="name">User</div><div id="sidebarEmail" class="email">email</div></div>
+        <button id="logoutBtn" class="logout-btn" title="Logout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <button id="mobileToggle" class="mobile-toggle">☰</button>
+      <div class="page-header">
+        <div><h1 id="projectTitle">Tasks</h1><p><a href="/projects.html">← Back to Projects</a></p></div>
+        <button id="createTaskBtn" class="btn btn-primary" style="display:none">+ New Task</button>
+      </div>
+
+      <!-- KANBAN BOARD -->
+      <div class="kanban-board">
+        <div class="kanban-column">
+          <div class="kanban-header">
+            <h3><span style="color:var(--info)">●</span> To Do</h3>
+            <span id="todoCount" class="kanban-count">0</span>
+          </div>
+          <div id="todoTasks"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-header">
+            <h3><span style="color:var(--warning)">●</span> In Progress</h3>
+            <span id="progressCount" class="kanban-count">0</span>
+          </div>
+          <div id="progressTasks"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-header">
+            <h3><span style="color:var(--success)">●</span> Done</h3>
+            <span id="doneCount" class="kanban-count">0</span>
+          </div>
+          <div id="doneTasks"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Task Modal -->
+  <div id="createTaskModal" class="modal-overlay" onclick="if(event.target===this)closeModal('createTaskModal')">
+    <div class="modal">
+      <div class="modal-header"><h2>Create Task</h2><button class="modal-close" onclick="closeModal('createTaskModal')">&times;</button></div>
+      <form id="createTaskForm">
+        <div class="form-group"><label for="taskTitle">Title</label><input type="text" id="taskTitle" class="form-control" required minlength="2" placeholder="Task title"></div>
+        <div class="form-group"><label for="taskDesc">Description</label><textarea id="taskDesc" class="form-control" rows="3" placeholder="Details..."></textarea></div>
+        <div class="form-group"><label for="taskAssignee">Assign To</label><select id="taskAssignee" class="form-control"><option value="">Unassigned</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group"><label for="taskPriority">Priority</label><select id="taskPriority" class="form-control"><option value="Low">Low</option><option value="Medium" selected>Medium</option><option value="High">High</option></select></div>
+          <div class="form-group"><label for="taskDueDate">Due Date</label><input type="date" id="taskDueDate" class="form-control"></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal('createTaskModal')">Cancel</button><button type="submit" class="btn btn-primary">Create Task</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Task Modal -->
+  <div id="editTaskModal" class="modal-overlay" onclick="if(event.target===this)closeModal('editTaskModal')">
+    <div class="modal">
+      <div class="modal-header"><h2>Edit Task</h2><button class="modal-close" onclick="closeModal('editTaskModal')">&times;</button></div>
+      <form id="editTaskForm">
+        <input type="hidden" id="editTaskId">
+        <div class="form-group admin-only-field"><label for="editTaskTitle">Title</label><input type="text" id="editTaskTitle" class="form-control"></div>
+        <div class="form-group admin-only-field"><label for="editTaskDesc">Description</label><textarea id="editTaskDesc" class="form-control" rows="3"></textarea></div>
+        <div class="form-group admin-only-field"><label for="editTaskAssignee">Assign To</label><select id="editTaskAssignee" class="form-control"><option value="">Unassigned</option></select></div>
+        <div class="form-group"><label for="editTaskStatus">Status</label><select id="editTaskStatus" class="form-control"><option value="To Do">To Do</option><option value="In Progress">In Progress</option><option value="Done">Done</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group admin-only-field"><label for="editTaskPriority">Priority</label><select id="editTaskPriority" class="form-control"><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select></div>
+          <div class="form-group admin-only-field"><label for="editTaskDueDate">Due Date</label><input type="date" id="editTaskDueDate" class="form-control"></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal('editTaskModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/tasks.js"></script>
+</body>
+</html>
