@@ -2,28 +2,37 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    let uri = process.env.MONGODB_URI;
+    const uri = process.env.MONGODB_URI;
 
-    // Use in-memory MongoDB for development if no real MongoDB is available
-    if (!uri || uri.includes('localhost') || uri.includes('127.0.0.1')) {
-      try {
-        // Try connecting to the configured URI first
-        if (uri) {
-          await mongoose.connect(uri, { serverSelectionTimeoutMS: 3000 });
-          console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
-          return mongoose.connection;
-        }
-      } catch {
-        // Fall through to memory server
-      }
-
-      // Use in-memory MongoDB server
-      const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongod = await MongoMemoryServer.create();
-      uri = mongod.getUri();
-      console.log('📦 Using in-memory MongoDB server for development');
+    if (!uri) {
+      console.error('❌ MONGODB_URI environment variable is not set');
+      process.exit(1);
     }
 
+    // In development, if using localhost and connection fails, try in-memory
+    if (uri.includes('localhost') || uri.includes('127.0.0.1')) {
+      try {
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 3000 });
+        console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
+        return mongoose.connection;
+      } catch {
+        // Try in-memory server for local development
+        try {
+          const { MongoMemoryServer } = require('mongodb-memory-server');
+          const mongod = await MongoMemoryServer.create();
+          const memUri = mongod.getUri();
+          await mongoose.connect(memUri);
+          console.log('📦 Using in-memory MongoDB server for development');
+          console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
+          return mongoose.connection;
+        } catch (memErr) {
+          console.error('❌ Could not start in-memory MongoDB:', memErr.message);
+          process.exit(1);
+        }
+      }
+    }
+
+    // Production: connect directly to the provided URI
     const conn = await mongoose.connect(uri);
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
 
